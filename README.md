@@ -1,48 +1,67 @@
-# Aaron Douglas Next.js + Supabase starter
+# claude-nextjs-supabase-template
 
-A small, reviewed baseline for authenticated Aaron Douglas client
-applications. Repositories created from this template start with:
+A Next.js 16 and Supabase starter that arrives with a working Claude Code setup: nine subagents,
+fifteen slash commands, ten skills, standing rules, and session hooks that survive compaction.
 
-- Next.js App Router, React, TypeScript, and Tailwind CSS
-- Supabase browser and server clients
-- environment-variable examples without credentials
-- lint, typecheck, development, and production scripts
+Use it as a GitHub template, or `gh repo create <name> --template devharunah/claude-nextjs-supabase-template`.
 
-## Start locally
+## What you get
+
+**The app**
+
+- Next.js 16, App Router, React 19, TypeScript strict
+- Tailwind CSS v4 through PostCSS
+- Supabase through `@supabase/ssr`, a server client and a browser client, both behind `requireEnv`
+- Biome for formatting and lint, ESLint for the Next rules
+- Jest for pure modules, Playwright for anything that renders or fetches
+
+**The CI**
+
+Four jobs in `.github/workflows/ci.yml`, sharing one composite setup action: lint, typecheck plus
+production build, unit tests, and E2E gated behind the other three. The Playwright report uploads
+as an artifact on failure.
+
+**The harness**
+
+`.claude/`, vendored from [everything-claude-code](https://github.com/devharunah/everything-claude-code)
+and adapted so it actually runs on this stack and on Windows. Read `.claude/README.md` for what
+changed and why.
+
+## Getting started
 
 ```bash
-cp .env.example .env.local
 pnpm install
+cp .env.example .env.local
+```
+
+Fill in `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, then:
+
+```bash
 pnpm dev
 ```
 
-Add a local or hosted Supabase project URL and publishable key to
-`.env.local`. Never commit service-role keys or provider credentials.
+## Then do these four things
 
-## Checks
+1. Fill in the bracketed parts of `CLAUDE.md`. The file is the contract every Claude session reads
+   first, and a template that still says `[Project name]` teaches it nothing.
+2. Rename the project in `package.json`.
+3. Add your Supabase secrets under Settings, Secrets and variables, Actions. The E2E job falls
+   back to a local URL so it stays green until you do.
+4. Decide your deploy target. `ci.yml` has a comment marking where the deploy steps attach.
 
-```bash
-pnpm exec playwright install --with-deps chromium   # once, before the first e2e run
-pnpm verify                                         # lint, typecheck, unit tests, e2e
-```
+## Commands
 
-`pnpm verify` runs the same sequence as CI, so a green run locally predicts a green
-pipeline. Individual steps are available as `pnpm lint`, `pnpm check` (Biome only),
-`pnpm typecheck`, `pnpm test`, and `pnpm e2e`. `pnpm lint:fix` and `pnpm format` apply
-fixes.
+| Command | What it does |
+|---|---|
+| `pnpm dev` | Dev server on port 3000 |
+| `pnpm verify` | lint, typecheck, Jest, Playwright. Run it before every push |
+| `pnpm check` | Biome |
+| `pnpm lint:fix` | ESLint and Biome, writing fixes |
+| `pnpm test` | Jest |
+| `pnpm e2e` | Playwright |
 
-## Continuous integration
+## Credit
 
-`.github/workflows/ci.yml` runs on every push and pull request against `main` and
-`staging`, using the shared `.github/actions/setup` composite action (pnpm + Node 20 +
-a frozen-lockfile install):
-
-- **lint** — Biome, then ESLint
-- **typecheck** — `tsc --noEmit`, then a production `next build`
-- **test** — Jest with Testing Library
-- **e2e** — Playwright against a real production server, gated on the three jobs above
-
-The e2e job reads Supabase credentials from repository secrets when they exist and falls
-back to safe defaults, so a fresh project from this template is green before any secret
-is configured. Deploy steps are intentionally left out — add them to `ci.yml` once a
-target is chosen.
+The Claude Code configuration is MIT licensed work by Affaan Mustafa, from
+[everything-claude-code](https://github.com/affaan-m/everything-claude-code). The Next.js and
+Supabase base follows `Aaron-Douglas/nextjs-supabase-starter`.
