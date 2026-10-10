@@ -9,7 +9,8 @@ Use it as a GitHub template, or `gh repo create <name> --template devharunah/cla
 
 **The app**
 
-- Next.js 16, App Router, React 19, TypeScript strict
+- Next.js 16, App Router, React 19, TypeScript strict, plus the strictness flags `strict`
+  itself leaves off, and typed routes and typed env vars from `next.config.ts`
 - Tailwind CSS v4 through PostCSS
 - Supabase through `@supabase/ssr`, a server client and a browser client, both behind `requireEnv`
 - Biome for formatting and lint, ESLint for the Next rules
@@ -59,6 +60,7 @@ pnpm dev
 | `pnpm lint:fix` | ESLint and Biome, writing fixes |
 | `pnpm test` | Jest |
 | `pnpm e2e` | Playwright |
+| `pnpm typecheck` | Regenerates route and env types, then runs `tsc --noEmit` |
 
 ## Credit
 

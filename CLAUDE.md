@@ -26,6 +26,8 @@
 | `src/lib/supabase/server.ts` | Server client. Reads cookies through `next/headers` |
 | `src/lib/supabase/browser.ts` | Browser client |
 | `src/lib/env.ts` | `requireEnv`. Every environment variable goes through it |
+| `next.config.ts` | Next config. Typed, and where `typedRoutes` and `typedEnv` are switched on |
+| `eslint.config.ts` | ESLint flat config. TypeScript, loaded through `jiti` |
 | `e2e/` | Playwright. Anything that renders or fetches belongs here |
 | `**/__tests__/` | Jest. Pure modules only |
 | `.claude/` | The Claude Code harness. See `.claude/README.md` |
@@ -40,6 +42,33 @@ that only exists in someone's `.env.local` does not exist.
 
 The service role key is server only. If a file that imports it is reachable from a client
 component, that key ships to the browser.
+
+## TypeScript
+
+`strict` is on, and so are the flags `strict` leaves out. The ones that change how you write code:
+
+| Flag | What it costs you |
+|---|---|
+| `noUncheckedIndexedAccess` | `arr[0]` and `record[key]` come back `T \| undefined`. Narrow before use |
+| `exactOptionalPropertyTypes` | `{ a?: string }` will not accept `{ a: undefined }`. Omit the key instead |
+| `noPropertyAccessFromIndexSignature` | Index signatures need brackets: `process.env["CI"]`, never `process.env.CI` |
+| `verbatimModuleSyntax` | Type-only imports must say `import type`. No exceptions |
+| `noUnusedLocals`, `noUnusedParameters` | An unused binding fails the build. Prefix with `_` if it has to stay |
+| `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noImplicitOverride` | Every branch returns, every case breaks, every override is declared |
+
+Biome's `useLiteralKeys` is off in `biome.json` because it is the exact inverse of
+`noPropertyAccessFromIndexSignature`: it rewrites `process.env["CI"]` back to `process.env.CI`,
+which the compiler then rejects. The compiler flag wins, so the lint rule goes. Do not switch it
+back on without removing the compiler flag in the same commit.
+
+`typedRoutes` generates route types into `.next/types`, so a bad `Link href` is a compile error.
+`experimental.typedEnv` types the variables the dev server loaded. Both write into `.next/types`,
+which a clean clone does not have, so `pnpm typecheck` runs `next typegen` first. That is why the
+script is not a bare `tsc --noEmit`: without it, CI would typecheck a project whose route and env
+types do not exist yet and pass for the wrong reason.
+
+`next-env.d.ts` is generated and git-ignored, on Next's own instruction. Never edit it, and never
+commit it back.
 
 ## The test split
 
